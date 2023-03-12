@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/fix/header.css">
+    <link rel="stylesheet" href="/css/fix/footer.css">
+    <link rel="stylesheet" href="/css/myPage/myPageMain.css">
+    <link rel="stylesheet" href="/css/myPage/myPageInfo.css">
+    <link rel="stylesheet" href="/css/myPage/myPageAside.css">
+    <link rel="stylesheet" href="/css/myPage/public.css">
+    <link rel="icon" href="/imgs/fix/favicon.png">
+    <title>마일스톤 | 나의 정보</title>
+</head>
+
+<body>
+<header th:replace="/fix/header.html :: header"></header>
+<div class="myPageWrap flex">
+    <!-- 어사이드 -->
+    <aside th:replace="/myPage/myPage_aside :: aside"></aside>
+    <!-- 메인 -->
+    <main class="main">
+        <div class="mainWrap flexCol">
+            <div class="mainTitle flexRow">나의 정보</div>
+            <div class="mainBodyWrap flex">
+                <!--이미지 테스트-->
+                <div class="imgTest"></div>
+                <!--이미지 테스트-->
+
+                <!-- 프로필 -->
+                <div class="profileWrap flexColNormal">
+                    <div class="profile"></div>
+                    <form th:action="@{/myPageRest/profile}" method="post" name="profileForm"
+                          enctype="multipart/form-data">
+                        <div class="updateProfileBtnWrap flexCol">
+                            <label class="updateProfileBtn flexPublic">
+                                <div>프로필 변경</div>
+                                <input type="file" name="profile" id="profile" style="display: none"
+                                       accept="image/gif,image/jpeg,image/png">
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <!-- 메인컨텐츠 -->
+                <div class="inputWrap margin-left-40 flexCol">
+                    <form th:action="@{/mypage/update}" th:object="${peopleDTO}" method="post" name="updateForm" id="updateForm">
+                        <div class="margin-bottom-20">
+                            <div class="margin-bottom-8 flexBetween">
+                                <div class="inputTitle">이메일</div>
+                            </div>
+                            <input th:value="*{userEmail}" class="inputCos" name="userEmail" id="email" type="email" placeholder="">
+                            <div class="margin-top-6" style="display: none;">
+                                <div class="warningMsg">이메일을 정확히 입력해 주세요.</div>
+                            </div>
+                        </div>
+                        <div class="margin-bottom-20">
+                            <div class="margin-bottom-8 flexBetween">
+                                <div class="inputTitle">이름</div>
+                            </div>
+                            <input th:value="*{userName}" class="inputCos" name="userName" id="name" type="text" placeholder="">
+                            <div class="margin-top-6" style="display: none;">
+                                <div class="warningMsg">이름을 정확히 입력해 주세요.</div>
+                            </div>
+                        </div>
+                        <div class="margin-bottom-20">
+                            <div class="margin-bottom-8 flexBetween">
+                                <div class="inputTitle">닉네임</div>
+                            </div>
+                            <input th:value="*{peopleNickname}" class="inputCos" name="peopleNickname" id="nickName" type="text" placeholder="">
+                            <div class="margin-top-6" style="display: none;">
+                                <div class="warningMsg">사용중인 닉네임입니다</div>
+                            </div>
+                        </div>
+                        <div class="margin-bottom-20">
+                            <div class="margin-bottom-8 flexBetween">
+                                <div class="inputTitle">휴대전화</div>
+                            </div>
+                            <div class="margin-bottom-8 flexBetween">
+                                <input th:value="*{userPhoneNumber}" class="inputCos" name="userPhoneNumber" id="phone" type="text" style="width: 79%;"
+                                       placeholder="">
+                                <button type="button" class="certificationBtn" disabled>인증번호 받기</button>
+                            </div>
+                            <div class="margin-top-6" style="display: none;">
+                                <div class="warningMsg">이메일 형식이 유효하지 않습니다.</div>
+                            </div>
+                            <input class="inputCos" type="text" name="certification" id="certification"
+                                   placeholder="인증번호를 입력해주세요" disabled>
+                            <div class="margin-top-6" style="display: none;">
+                                <div class="warningMsg">이메일 형식이 유효하지 않습니다.</div>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div style="flex-grow : 1"></div>
+                            <button type="submit" form="updateForm" class="submitBtn" disabled>수정하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<footer th:replace="/fix/footer.html :: footer"></footer>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+<script src="/js/fix/header.js"></script>
+<script src="/js/myPage/myInfo.js"></script>
+<script th:inline="javascript">
+    let fileDTO = [[${fileDTO}]];
+    let arrayFile = [];
+    let fileType = "profile";
+
+    if (fileDTO) {
+        $('.profile').css("background-image", `url(/file/display?fileName=` + fileDTO.filePath + `/s_` + fileDTO.fileUuid + "_" + fileDTO.fileName + `)`)
+    }
+
+    $("input[type='file']").on("change", function () {
+        let formData = new FormData();
+        let $inputFile = $("input[type='file']");
+        let files = $inputFile[0].files;
+
+        console.log(Array.from(files));
+
+        Array.from(files).forEach(file => arrayFile.push(file));
+        const dataTransfer = new DataTransfer();
+        arrayFile.forEach(file => dataTransfer.items.add(file));
+        $(this)[0].files = dataTransfer.files;
+
+        console.log($(this)[0].files);
+
+        $(files).each(function (i, file) {
+            formData.append("upload", file);
+        });
+
+        fileType = $(this).attr("name");
+        console.log(fileType)
+        $.ajax({
+            url: "/file/upload",
+            type: "post",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: showUploadResult
+        });
+    });
+
+    function showUploadResult(files) {
+        let text = "";
+        let fileImgCheck;
+
+        let file1;
+        $(files).each(function (i, file) {
+            console.log("이치 들옴")
+            file1 = file;
+            text += `<input type="hidden" name="files[` + i + `].fileName" value="` + file.fileName + `">`;
+            text += `<input type="hidden" name="files[` + i + `].fileUploadPath" value="` + file.filePath + `">`;
+            text += `<input type="hidden" name="files[` + i + `].fileUuid" value="` + file.fileUuid + `">`;
+            text += `<input type="hidden" name="files[` + i + `].fileSize" value="` + file.fileSize + `">`;
+            text += `<input type="hidden" name="files[` + i + `].fileImageCheck" value="` + file.fileImageCheck + `">`;
+            if (!file.fileImageCheck) {
+                text += `<img src="/images/attach.png" width="100">`;
+            } else {
+                text += `<img src="/file/display?fileName=` + file.filePath + `/s_` + file.fileUuid + "_" + file.fileName + `">`;
+            }
+        });
+        console.log($('.profile'))
+        console.log($('.profile').css("background-image"))
+        console.log(`url(/file/display?fileName=` + file1.filePath + `/s_` + file1.fileUuid + "_" + file1.fileName + `)`)
+        $('.profile').css("background-image", `url(/file/display?fileName=` + file1.filePath + `/s_` + file1.fileUuid + "_" + file1.fileName + `)`)
+        saveProfile({
+            fileName: file1.fileName,
+            filePath: file1.filePath,
+            fileUuid: file1.fileUuid,
+            fileSize: file1.fileSize,
+            fileImageCheck: file1.fileImageCheck,
+            fileType: fileType
+        })
+    }
+
+    function saveProfile(fileDTO) {
+        console.log(fileDTO)
+        $.ajax({
+            url: "/myPageRest/profile",
+            type: "post",
+            data: JSON.stringify(fileDTO),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("파일 저장 성공!!")
+                console.log("들어왔니?")
+            },
+            error: function (xhr, status, err) {
+                if (error) {
+                    error(err);
+                }
+            }
+        })
+    }
+
+    $("input[type='submit']").on("click", function (e) {
+        e.preventDefault();
+        let text = "";
+        $.each($(".uploadResult ul li"), function (i, li) {
+            let fileName = $(li).data("file-name");
+            let fileUploadPath = $(li).data("file-upload-path");
+            let fileUuid = $(li).data("file-uuid");
+            let fileSize = $(li).data("file-size");
+            let fileImageCheck = $(li).data("file-image-check");
+            text += `<input type="hidden" name="files[` + i + `].fileName" value="` + fileName + `">`;
+            text += `<input type="hidden" name="files[` + i + `].fileUploadPath" value="` + fileUploadPath + `">`;
+            text += `<input type="hidden" name="files[` + i + `].fileUuid" value="` + fileUuid + `">`;
+            text += `<input type="hidden" name="files[` + i + `].fileSize" value="` + fileSize + `">`;
+            text += `<input type="hidden" name="files[` + i + `].fileImageCheck" value="` + fileImageCheck + `">`;
+        });
+        $("form#writeForm").append(text).submit();
+    });
+</script>
+</html>
